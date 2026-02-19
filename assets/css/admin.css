@@ -1,0 +1,73 @@
+/**
+ * WP Fetch admin styles.
+ *
+ * @package WP_Fetch
+ */
+
+.wp-fetch-source-form .form-table th {
+	width: 200px;
+}
+
+#wp-fetch-form-message {
+	margin-top: 10px;
+}
+
+#wp-fetch-form-message .notice {
+	margin-left: 0;
+}
+
+.wp-fetch-status-ok {
+	color: #46b450;
+	font-weight: 600;
+}
+
+.wp-fetch-status-stale {
+	color: #ffb900;
+	font-weight: 600;
+}
+
+.wp-fetch-status-error {
+	color: #dc3232;
+	font-weight: 600;
+}
+
+.wp-fetch-status-indicator {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	margin-right: 6px;
+	vertical-align: middle;
+}
+
+.wp-fetch-status-indicator.ok {
+	background-color: #46b450;
+}
+
+.wp-fetch-status-indicator.stale {
+	background-color: #ffb900;
+}
+
+.wp-fetch-status-indicator.error {
+	background-color: #dc3232;
+}
+
+#wp-fetch-widget-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+#wp-fetch-widget-table th,
+#wp-fetch-widget-table td {
+	padding: 6px 8px;
+	text-align: left;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+#wp-fetch-widget-table th {
+	font-weight: 600;
+}
+
+.wp-fetch-widget-actions button {
+	margin-right: 4px;
+}
