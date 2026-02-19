@@ -15,5 +15,8 @@ node_modules/
 # Build
 *.phar
 
+# Test cache
+.phpunit.cache/
+
 # OS
 Thumbs.db
