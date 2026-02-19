@@ -1,0 +1,21 @@
+{
+    "name": "devaloi/wp-fetch",
+    "description": "WordPress plugin that fetches and displays external API data with caching and rate limiting.",
+    "type": "wordpress-plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "WP_Fetch\\": "includes/"
+        },
+        "files": []
+    },
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "config": {
+        "allow-plugins": {}
+    }
+}

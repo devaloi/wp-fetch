@@ -1,0 +1,19 @@
+# Dependencies
+vendor/
+node_modules/
+
+# Environment
+.env
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build
+*.phar
+
+# OS
+Thumbs.db
