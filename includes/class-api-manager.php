@@ -14,13 +14,27 @@ class API_Manager {
 
 	private const TIMEOUT = 15;
 
+	private Cache $cache;
+	private Rate_Limiter $rate_limiter;
+	private Error_Handler $error_handler;
+
 	/**
-	 * Fetch data from a named source (direct HTTP, no caching layer).
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->cache         = new Cache();
+		$this->rate_limiter  = new Rate_Limiter();
+		$this->error_handler = new Error_Handler();
+	}
+
+	/**
+	 * Fetch data from a named source with caching, rate limiting, and fallback.
 	 *
 	 * @param string $source_name Source slug.
-	 * @return array{success: bool, data: mixed, status_code: int, error: string}
+	 * @param bool   $force_refresh Skip cache and re-fetch.
+	 * @return array{success: bool, data: mixed, status_code: int, error: string, cached: bool}
 	 */
-	public function fetch( string $source_name ): array {
+	public function fetch( string $source_name, bool $force_refresh = false ): array {
 		$source = API_Source::get( $source_name );
 		if ( null === $source ) {
 			return self::error_response(
@@ -29,7 +43,99 @@ class API_Manager {
 			);
 		}
 
-		return $this->fetch_from_source( $source );
+		return $this->fetch_with_cache( $source, $force_refresh );
+	}
+
+	/**
+	 * Integrated flow: cache check → rate limit → HTTP fetch → cache store → fallback.
+	 *
+	 * @param API_Source $source        The source to fetch.
+	 * @param bool      $force_refresh  Skip reading from cache.
+	 * @return array{success: bool, data: mixed, status_code: int, error: string, cached: bool}
+	 */
+	public function fetch_with_cache( API_Source $source, bool $force_refresh = false ): array {
+		$cache_key = 'source_' . $source->get_name();
+
+		if ( ! $force_refresh ) {
+			$cached = $this->cache->get( $cache_key );
+			if ( null !== $cached ) {
+				return array(
+					'success'     => true,
+					'data'        => $cached,
+					'status_code' => 200,
+					'error'       => '',
+					'cached'      => true,
+				);
+			}
+		}
+
+		if ( ! $this->rate_limiter->allow( $source->get_name() ) ) {
+			$stale = $this->cache->get_stale( $cache_key );
+			if ( null !== $stale ) {
+				return array(
+					'success'     => true,
+					'data'        => $stale,
+					'status_code' => 200,
+					'error'       => '',
+					'cached'      => true,
+				);
+			}
+			$this->error_handler->log( $source->get_name(), __( 'Rate limit exceeded.', 'wp-fetch' ) );
+			return self::error_response( __( 'Rate limit exceeded.', 'wp-fetch' ) );
+		}
+
+		$this->rate_limiter->record( $source->get_name() );
+		$result = $this->fetch_from_source( $source );
+
+		if ( $result['success'] ) {
+			$ttl = $source->get_cache_ttl();
+			if ( $ttl > 0 ) {
+				$this->cache->set( $cache_key, $result['data'], $ttl );
+			}
+			$result['cached'] = false;
+			return $result;
+		}
+
+		$this->error_handler->log( $source->get_name(), $result['error'] );
+
+		$stale = $this->cache->get_stale( $cache_key );
+		if ( null !== $stale ) {
+			return array(
+				'success'     => true,
+				'data'        => $stale,
+				'status_code' => 200,
+				'error'       => '',
+				'cached'      => true,
+			);
+		}
+
+		$fallback = $source->get_fallback();
+		if ( ! empty( $fallback ) ) {
+			return array(
+				'success'     => false,
+				'data'        => $fallback,
+				'status_code' => 0,
+				'error'       => $result['error'],
+				'cached'      => false,
+			);
+		}
+
+		$result['cached'] = false;
+		return $result;
+	}
+
+	/**
+	 * Get the error handler instance.
+	 */
+	public function get_error_handler(): Error_Handler {
+		return $this->error_handler;
+	}
+
+	/**
+	 * Get the cache instance.
+	 */
+	public function get_cache(): Cache {
+		return $this->cache;
 	}
 
 	/**
