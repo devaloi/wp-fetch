@@ -32,12 +32,12 @@ class API_Source {
 	public function __construct( array $data = array() ) {
 		$this->name       = sanitize_key( $data['name'] ?? '' );
 		$this->url        = esc_url_raw( $data['url'] ?? '' );
-		$this->method     = in_array( strtoupper( $data['method'] ?? 'GET' ), array( 'GET', 'POST' ), true )
-			? strtoupper( $data['method'] )
-			: 'GET';
+		$method           = strtoupper( $data['method'] ?? 'GET' );
+		$this->method     = in_array( $method, array( 'GET', 'POST' ), true ) ? $method : 'GET';
 		$this->headers    = self::sanitize_headers( $data['headers'] ?? array() );
-		$this->auth_type  = in_array( $data['auth_type'] ?? 'none', array( 'none', 'api_key', 'bearer' ), true )
-			? $data['auth_type']
+		$auth_type        = $data['auth_type'] ?? 'none';
+		$this->auth_type  = in_array( $auth_type, array( 'none', 'api_key', 'bearer' ), true )
+			? $auth_type
 			: 'none';
 		$this->auth_value = sanitize_text_field( $data['auth_value'] ?? '' );
 		$this->cache_ttl  = absint( $data['cache_ttl'] ?? 300 );

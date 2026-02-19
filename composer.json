@@ -4,10 +4,9 @@
     "type": "wordpress-plugin",
     "license": "MIT",
     "autoload": {
-        "psr-4": {
-            "WP_Fetch\\": "includes/"
-        },
-        "files": []
+        "classmap": [
+            "includes/"
+        ]
     },
     "require": {
         "php": ">=8.2"
