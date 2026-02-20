@@ -1,5 +1,7 @@
 # WP Fetch
 
+[![CI](https://github.com/devaloi/wp-fetch/actions/workflows/ci.yml/badge.svg)](https://github.com/devaloi/wp-fetch/actions/workflows/ci.yml)
+
 A WordPress plugin that fetches and displays external API data in the admin dashboard and via shortcodes — with transient caching, rate limiting, error handling, and a settings page.
 
 ## Features
